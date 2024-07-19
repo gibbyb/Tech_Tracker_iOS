@@ -86,7 +86,7 @@ struct StatusUpdateView: View {
                     .font(.headline) // Make the button text larger
                     .padding() // Add padding around the button text to make the button larger
                     .frame(minWidth: 0, maxWidth: .infinity) // Makes the button expand to full width
-                    .background(Color.accent) // Sets the button background color to blue
+                    .background(Color.accentColor) // Sets the button background color to blue
                     .foregroundColor(.white) // Sets the button text color to white
                     .cornerRadius(10) // Rounds the corners of the button
             }
@@ -102,7 +102,7 @@ struct StatusUpdateView: View {
                         .font(.headline)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.accent)
+                        .background(Color.accentColor)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -115,7 +115,7 @@ struct StatusUpdateView: View {
                         .font(.headline)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.accent)
+                        .background(Color.accentColor)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -129,7 +129,7 @@ struct StatusUpdateView: View {
                         .font(.headline)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.accent)
+                        .background(Color.accentColor)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -142,7 +142,7 @@ struct StatusUpdateView: View {
                         .font(.headline)
                         .padding()
                         .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
-                        .background(Color.accent)
+                        .background(Color.accentColor)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -156,7 +156,7 @@ struct StatusUpdateView: View {
                         .font(.headline)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.accent)
+                        .background(Color.accentColor)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -169,7 +169,7 @@ struct StatusUpdateView: View {
                         .font(.headline)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.accent)
+                        .background(Color.accentColor)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -183,7 +183,7 @@ struct StatusUpdateView: View {
                         .font(.headline)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.accent)
+                        .background(Color.accentColor)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -196,7 +196,7 @@ struct StatusUpdateView: View {
                         .font(.headline)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.accent)
+                        .background(Color.accentColor)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -210,7 +210,7 @@ struct StatusUpdateView: View {
                         .font(.headline)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.accent)
+                        .background(Color.accentColor)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -223,7 +223,7 @@ struct StatusUpdateView: View {
                         .font(.headline)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.accent)
+                        .background(Color.accentColor)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -243,9 +243,12 @@ class TechnicianViewModel: ObservableObject {
     @Published var currentPage = 1
     var totalPageCount = 1
     
+    let apiKey = ProcessInfo.processInfo.environment["API_KEY"] ?? ""
+    
     // Fetch technicians function for Technicians API
     func fetchTechnicians() {
-        let urlString = "https://techtracker.gibbyb.com/api/technicians?apikey=APIKEYHERE"
+        
+        let urlString = "https://techtracker.gibbyb.com/api/technicians?apikey=" + apiKey
         guard let url = URL(string: urlString) else { return }
         
         URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
@@ -281,7 +284,7 @@ class TechnicianViewModel: ObservableObject {
     
     // Update Technician Status function for the Update API
     func updateTechnicianStatus(name: String, newStatus: String) {
-        let urlString = "https://techtracker.gibbyb.com/api/update_technicians?apikey=APIKEYHERE"
+        let urlString = "https://techtracker.gibbyb.com/api/update_technicians?apikey=" + apiKey
         guard let url = URL(string: urlString) else { return }
 
         let updateData = [TechnicianUpdate(name: name, status: newStatus)]
@@ -325,7 +328,7 @@ class TechnicianViewModel: ObservableObject {
     // Fetch Technician History Function for the History API. Very similar to Technician API
     // but with some added metadata
     func fetchTechnicianHistory(page: Int = 1) {
-        let urlString = "https://techtracker.gibbyb.com/api/history?apikey=APIKEYHERE&page=\(page)"
+        let urlString = "https://techtracker.gibbyb.com/api/history?apikey=" + apiKey + "&page=\(page)"
         guard let url = URL(string: urlString) else { return }
         
         URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
@@ -395,10 +398,11 @@ struct ContentView: View {
         List {
             ForEach(viewModel.technicians) { technician in
                 Button(action: {
-                    self.showingUpdateView = true
+                    viewModel.fetchTechnicians()
                     self.selectedTechnicianName = technician.name
                     self.selectedTechnicianCurrStatus = technician.status
-                }) {
+                    self.showingUpdateView = true
+                })  {
                     HStack {
                         VStack(alignment: .leading, spacing: 5) {
                             Text(technician.name).bold()
@@ -428,7 +432,6 @@ struct ContentView: View {
             viewModel.fetchTechnicians()
         }
         .sheet(isPresented: $showingUpdateView) {
-            // Pass the selected technician name directly to an explicitly initialized StatusUpdateView
             StatusUpdateView(isPresented: $showingUpdateView,
                              technicianName: selectedTechnicianName,
                              technicianStatus: selectedTechnicianCurrStatus,
