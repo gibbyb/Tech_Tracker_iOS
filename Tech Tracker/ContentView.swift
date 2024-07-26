@@ -12,12 +12,12 @@ import Combine
 struct Technician: Identifiable, Codable {
     let name: String
     let status: String
-    let time: Date
+    let updatedAt: Date
     
     var id: String { name }  // Computed property for Identifiable conformance
 
     enum CodingKeys: String, CodingKey {
-        case name, status, time
+        case name, status, updatedAt
     }
 }
 
@@ -37,11 +37,11 @@ struct HistoryResponse: Decodable {
 struct TechnicianHistory: Identifiable, Codable {
     let name: String
     let status: String
-    let time: Date
+    let updatedAt: Date
     var id: UUID { UUID() }
     
     enum CodingKeys: String, CodingKey {
-        case name, status, time
+        case name, status, updatedAt
     }
 }
 
@@ -248,7 +248,7 @@ class TechnicianViewModel: ObservableObject {
     // Fetch technicians function for Technicians API
     func fetchTechnicians() {
         
-        let urlString = "https://techtracker.gibbyb.com/api/technicians?apikey=" + apiKey
+        let urlString = "https://techtracker.gibbyb.com/api/get_technicians?apikey=" + apiKey
         guard let url = URL(string: urlString) else { return }
         
         URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
@@ -284,7 +284,7 @@ class TechnicianViewModel: ObservableObject {
     
     // Update Technician Status function for the Update API
     func updateTechnicianStatus(name: String, newStatus: String) {
-        let urlString = "https://techtracker.gibbyb.com/api/update_technicians?apikey=" + apiKey
+        let urlString = "https://techtracker.gibbyb.com/api/update_status_by_name?apikey=" + apiKey
         guard let url = URL(string: urlString) else { return }
 
         let updateData = [TechnicianUpdate(name: name, status: newStatus)]
@@ -328,7 +328,7 @@ class TechnicianViewModel: ObservableObject {
     // Fetch Technician History Function for the History API. Very similar to Technician API
     // but with some added metadata
     func fetchTechnicianHistory(page: Int = 1) {
-        let urlString = "https://techtracker.gibbyb.com/api/history?apikey=" + apiKey + "&page=\(page)"
+        let urlString = "https://techtracker.gibbyb.com/api/get_paginated_history?apikey=" + apiKey + "&page=\(page)"
         guard let url = URL(string: urlString) else { return }
         
         URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
@@ -412,8 +412,8 @@ struct ContentView: View {
                         Spacer()
                         VStack(alignment: .trailing, spacing: 5) {
                             VStack {
-                                Text(technician.time, format: .dateTime.hour().minute()).font(.system(size: 20))
-                                Text(technician.time, format: .dateTime.day().month()).font(.system(size: 18))
+                                Text(technician.updatedAt, format: .dateTime.hour().minute()).font(.system(size: 20))
+                                Text(technician.updatedAt, format: .dateTime.day().month()).font(.system(size: 18))
                             }
                         }
                     }
@@ -449,8 +449,8 @@ struct ContentView: View {
                     }
                     Spacer()
                     VStack(alignment: .trailing, spacing: 5) {
-                        Text(history.time, format: .dateTime.hour().minute()).font(.system(size: 20))
-                        Text(history.time, format: .dateTime.day().month()).font(.system(size: 18))
+                        Text(history.updatedAt, format: .dateTime.hour().minute()).font(.system(size: 20))
+                        Text(history.updatedAt, format: .dateTime.day().month()).font(.system(size: 18))
                     }
                 }
             }
